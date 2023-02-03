@@ -17,20 +17,22 @@ LIMIT 5;
 --Ans: npi ...4483 has the highest sum of total claim count(99,707).
 
 
--- 1. b. Repeat the above, but this time report the nppes_provider_first_name, nppes_provider_last_org_name, specialty_description, and the total number of claims.
---names, specialty_description in prescriber table, total_claim_count in prescription table
+-- 1.Report the nppes_provider_first_name, nppes_provider_last_org_name, specialty_description, and the total number of claims.
 
-SELECT nppes_provider_first_name, nppes_provider_last_org_name, specialty_description
-FROM prescriber
+
+
+SELECT pber.npi, nppes_provider_first_name AS First, nppes_provider_last_org_name AS Last, specialty_description, total_claim
+FROM prescriber AS pber
+
+INNER JOIN (SELECT npi, SUM(total_claim_count) AS total_claim 
+			FROM prescription 
+			GROUP BY npi) AS claims
+USING (npi)
+
+ORDER BY total_claim DESC
 LIMIT 5;
 
-
-
-SELECT nppes_provider_first_name, nppes_provider_last_org_name, specialty_description, SUM(total_claim_count)
-FROM prescriber
-INNER JOIN prescription 
-USING(npi)
-LIMIT 5;
+--Bruce Pendley, Famil Practice, has the most number of claims.
 
 
 --2. a. Which specialty had the most total number of claims (totaled over all drugs)?
@@ -121,16 +123,11 @@ ORDER BY total DESC;
 
 --5. a. How many CBSAs are in Tennessee? Warning: The cbsa table contains information for all states, not just Tennessee.
 
-SELECT *
+SELECT DISTINCT cbsaname
 FROM cbsa
-WHERE cbsaname LIKE '%TN';
+WHERE fipscounty LIKE '47%'
 
-
-SELECT COUNT(DISTINCT cbsaname)
-FROM cbsa
-WHERE cbsaname LIKE '%TN';
-
---There are 6 CBSAs in Tennessee.
+--There are 10 CBSAs in Tennessee.
 
 
 --b. Which cbsa has the largest combined population? 
@@ -148,6 +145,57 @@ ORDER BY total_population DESC;
 
 --c. What is the largest (in terms of population) county which is not included in a CBSA? Report the county name and population.
 
+SELECT county, SUM(population) AS total_popln
+FROM population
 
+FULL JOIN cbsa
+USING(fipscounty)
+
+FULL JOIN fips_county
+USING(fipscounty)
+
+WHERE cbsaname IS NULL 
+		AND population IS NOT NULL
+GROUP BY county
+ORDER BY total_popln DESC
+LIMIT 3;
+
+--SEVIER county is the largest county not included in CBSA (95,523)
+
+
+--6 a. Find all rows in the prescription table where total_claims is at least 3000. Report the drug_name and the total_claim_count.
+
+SELECT drug_name, total_claim_count
+FROM prescription
+WHERE total_claim_count >= 3000
+ORDER BY total_claim_count;
+
+
+-- b. For each instance that you found in part a, add a column that indicates whether the drug is an opioid.
+SELECT prescription.drug_name, total_claim_count, opioid_drug_flag
+FROM prescription
+
+LEFT JOIN drug
+USING(drug_name)
+
+WHERE total_claim_count >= 3000
+ORDER BY total_claim_count;
+
+--Two drugs have opioid drug flag (hydrocodone-acetaminophen and oxycodone hcl)
+
+-- c. Add another column to you answer from the previous part which gives the prescriber first and last name associated with each row.
+SELECT prescription.drug_name, total_claim_count, opioid_drug_flag, nppes_provider_first_name AS First, nppes_provider_last_org_name AS Last
+FROM prescription
+
+LEFT JOIN drug
+USING(drug_name)
+
+LEFT JOIN prescriber
+USING(npi)
+
+WHERE total_claim_count >= 3000
+ORDER BY total_claim_count;
+
+--David Coffey has the highest total claim count with oxycodone hcl.
 
 
