@@ -63,6 +63,10 @@ LIMIT 3;
 --Nurse Practitioner has the most total number of claims for opioids (900,845).
 
 
+-- 2c. Challenge Question: Are there any specialties that appear in the prescriber table that have no associated prescriptions in the prescription table?
+
+
+-- d. Difficult Bonus: Do not attempt until you have solved all other problems! For each specialty, report the percentage of total claims by that specialty which are for opioids. Which specialties have a high percentage of opioids? 
 
 --3. a. Which drug (generic_name) had the highest total drug cost?
 
@@ -197,5 +201,69 @@ WHERE total_claim_count >= 3000
 ORDER BY total_claim_count;
 
 --David Coffey has the highest total claim count with oxycodone hcl.
+
+
+--7. The goal of this exercise is to generate a full list of all pain management specialists in Nashville and the number of claims they had for each opioid. 
+--   Hint: The results from all 3 parts will have 637 rows.
+
+--a. First, create a list of all npi/drug_name combinations for pain management specialists (specialty_description = 'Pain Managment') 
+-- 	 in the city of Nashville (nppes_provider_city = 'NASHVILLE'), 
+--   where the drug is an opioid (opiod_drug_flag = 'Y'). 
+--   Warning: Double-check your query before running it. You will only need to use the prescriber and drug tables since you don't need the claims numbers yet.
+
+------------------------------------------------
+------DONT USE--------
+-- SELECT pr.npi  , drug.drug_name
+-- FROM prescriber AS pr
+-- -- INNER JOIN (SELECT npi, drug_name FROM prescription) AS pn
+-- -- USING(npi)
+-- CROSS JOIN drug 
+-- -- INNER JOIN drug AS drg
+-- -- USING(drug_name)
+-- WHERE specialty_description = 'Pain Management'
+-- AND pr.nppes_provider_city = 'NASHVILLE'
+-- AND opioid_drug_flag = 'Y';
+-------------------------------------------------
+
+
+SELECT pr.npi  , drug.drug_name
+FROM prescriber AS pr
+
+CROSS JOIN drug 
+
+WHERE specialty_description = 'Pain Management'
+AND pr.nppes_provider_city = 'NASHVILLE'
+AND opioid_drug_flag = 'Y';
+
+
+-- b. Next, report the number of claims per drug per prescriber. 
+--    Be sure to include all combinations, whether or not the prescriber had any claims. 
+--    You should report the npi, the drug name, and the number of claims (total_claim_count).
+-- c. Fill in any missing values for total_claim_count with 0.
+
+SELECT pr.npi  , drug.drug_name, COALESCE(total_claim_count,0)
+FROM prescriber AS pr
+
+CROSS JOIN drug 
+
+FULL JOIN prescription USING(npi, drug_name)
+
+WHERE specialty_description = 'Pain Management'
+AND pr.nppes_provider_city = 'NASHVILLE'
+AND opioid_drug_flag = 'Y';
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
 
 
