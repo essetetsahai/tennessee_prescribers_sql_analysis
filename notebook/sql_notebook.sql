@@ -401,9 +401,9 @@ USING(generic);
 
 
 
--- 3. Your goal in this question is to generate a list of the top prescribers in each of the major metropolitan areas of Tennessee.
+-- Generate a list of the top prescribers in each of the major metropolitan areas of Tennessee.
 
---     a. First, write a query that finds the top 5 prescribers in Nashville in terms of the total number of claims (total_claim_count) across all drugs. Report the npi, the total number of claims, and include a column showing the city.
+--     Top 5 prescribers in Nashville in terms of the total number of claims (total_claim_count) across all drugs: Report the npi, the total number of claims, and city.
 
 
 SELECT pbr.npi, pbr.nppes_provider_city,  ptn.total_claims AS total_claims
@@ -418,7 +418,7 @@ ORDER BY total_claims DESC
 LIMIT 5;
 
 
---     b. Now, report the same for Memphis.
+--     b. Memphis.
 SELECT pbr.npi, pbr.nppes_provider_city,  ptn.total_claims AS total_claims
 FROM prescriber AS pbr
 INNER JOIN (SELECT npi, SUM(total_claim_count) AS total_claims
@@ -430,7 +430,7 @@ WHERE nppes_provider_city = 'MEMPHIS'
 ORDER BY total_claims DESC
 LIMIT 5;
 
---     c. Combine your results from a and b, along with the results for Knoxville and Chattanooga.
+--     c. Combine data for Nashville, Memphis, Knoxville and Chattanooga.
 
 (SELECT pbr.npi, pbr.nppes_provider_city,  ptn.total_claims AS total_claims
 FROM prescriber AS pbr
@@ -476,18 +476,6 @@ WHERE nppes_provider_city = 'KNOXVILLE'
 ORDER BY total_claims DESC
 LIMIT 5)
 ORDER BY nppes_provider_city, total_claims DESC;
-
-
-
-
-
-
-
--- 4. Find all counties which had an above-average (for the state) number of overdose deaths in 2017. Report the county name and number of overdose deaths.
-
--- 5.
---     a. Write a query that finds the total population of Tennessee.
---     b. Build off of the query that you wrote in part a to write a query that returns for each county that county's name, its population, and the percentage of the total population of Tennessee that is contained in that county.
 
 
 
